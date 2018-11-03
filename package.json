@@ -1,0 +1,81 @@
+{
+    "name": "swipr",
+    "version": "1.0.0",
+    "description": "Command line tool for Tinder automation",
+    "main": "bin/index.js",
+    "bin": {
+        "swipr": "bin/index.js"
+    },
+    "scripts": {
+        "start": "node --require dotenv/config bin/index",
+        "lint": "eslint **/*.{js,json}",
+        "format": "prettier --write '**/*.js' '**/*.json' '**/*.md'"
+    },
+    "author": "Ramón Guijarro <hola@soyguijarro.com>",
+    "license": "MIT",
+    "repository": "https://github.com/soyguijarro/swipr",
+    "engines": {
+        "node": ">=8.10.0"
+    },
+    "dependencies": {
+        "casex": "^3.0.0",
+        "chalk": "^2.4.2",
+        "configstore": "^4.0.0",
+        "date-fns": "^1.30.1",
+        "dotenv": "^6.2.0",
+        "inquirer": "^6.2.2",
+        "node-fetch": "^2.3.0"
+    },
+    "eslintConfig": {
+        "env": {
+            "browser": true,
+            "node": true,
+            "es6": true
+        },
+        "parserOptions": {
+            "ecmaVersion": 2018
+        },
+        "extends": [
+            "eslint:recommended"
+        ],
+        "plugins": [
+            "json"
+        ],
+        "rules": {
+            "semi": [
+                "error",
+                "always"
+            ]
+        }
+    },
+    "prettier": {
+        "printWidth": 90,
+        "tabWidth": 4,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "bracketSpacing": false
+    },
+    "lint-staged": {
+        "*.{js,json}": [
+            "eslint --fix",
+            "prettier --write",
+            "git add"
+        ],
+        "*.md": [
+            "prettier --write",
+            "git add"
+        ]
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "devDependencies": {
+        "eslint": "^5.15.1",
+        "eslint-plugin-json": "^1.4.0",
+        "husky": "^1.3.1",
+        "lint-staged": "^7.3.0",
+        "prettier": "^1.16.4"
+    }
+}
