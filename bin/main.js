@@ -1,4 +1,4 @@
-const differenceInYears = require('date-fns/difference_in_years');
+const {differenceInYears} = require('date-fns');
 const {errors: apiErrors} = require('./api');
 const {like, pass, error, blankLine} = require('./common/log');
 
