@@ -1,4 +1,4 @@
-const {get, post} = require('../requests');
+const {get, post} = require('./requests');
 const errors = require('./errors');
 
 const BASE_URL = 'https://api.gotinder.com';
@@ -35,23 +35,41 @@ const getApiToken = async ({phoneNumber, refreshToken}) => {
     return api_token;
 };
 
-const authenticate = async ({accessId, accessToken}) => {
-    const {
-        data: {api_token, refresh_token},
-    } = await post(`${BASE_URL}/v2/auth/login/accountkit`, {
-        body: {
-            id: accessId,
-            token: accessToken,
-        },
-    });
-    return {apiToken: api_token, refreshToken: refresh_token};
+const getRefreshToken = async ({phoneNumber, otpCode}) => {
+    try {
+        const {
+            data: {refresh_token},
+        } = await post(`${BASE_URL}/v2/auth/sms/validate`, {
+            params: {auth_type: 'sms'},
+            body: {phone_number: phoneNumber, otp_code: otpCode},
+        });
+        return refresh_token;
+    } catch (err) {
+        const error = err.statusCode === 400 ? errors.INVALID_OTP_CODE : err;
+        throw error;
+    }
+};
+
+const requestOtpCode = async phoneNumber => {
+    try {
+        const {
+            data: {otp_length},
+        } = await post(`${BASE_URL}/v2/auth/sms/send`, {
+            params: {auth_type: 'sms'},
+            body: {phone_number: phoneNumber},
+        });
+        return otp_length;
+    } catch (err) {
+        const error = err.statusCode === 400 ? errors.INVALID_PHONE_NUMBER : err;
+        throw error;
+    }
 };
 
 module.exports = {
-    authenticate,
+    requestOtpCode,
+    getRefreshToken,
     getApiToken,
     getMatchRecommendations,
     likeUser,
     passUser,
-    errors,
 };

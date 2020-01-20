@@ -1,14 +1,10 @@
 const {
-    startSmsLogin,
-    confirmSmsLogin,
-    errors: accountkitErrors,
-} = require('./accountkit');
-const {
-    authenticate,
+    requestOtpCode,
+    getRefreshToken,
     getApiToken,
-    errors: tinderErrors,
     ...apiMethods
-} = require('./tinder');
+} = require('./methods');
+const errors = require('./errors');
 
 const UNAUTHORIZED_CODE = 401;
 
@@ -52,8 +48,7 @@ const createApi = async ({phoneNumber, refreshToken}) => {
 
 module.exports = {
     createApi,
-    startSmsLogin,
-    confirmSmsLogin,
-    authenticate,
-    errors: {...accountkitErrors, ...tinderErrors},
+    requestOtpCode,
+    getRefreshToken,
+    errors,
 };

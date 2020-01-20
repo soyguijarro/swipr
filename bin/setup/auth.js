@@ -1,15 +1,10 @@
-const {
-    startSmsLogin,
-    confirmSmsLogin,
-    authenticate,
-    errors: apiErrors,
-} = require('../api');
+const {requestOtpCode, getRefreshToken, errors: apiErrors} = require('../api');
 const {regular, prompt, blankLine} = require('../common/log');
 
 const isEmpty = value => value === undefined || value === '';
 
-const askForConfirmationCode = async ({phoneNumber, loginRequestCode}) => {
-    let accessParams;
+const askForConfirmationCode = async ({phoneNumber, otpLength}) => {
+    let refreshToken;
     let error;
 
     await prompt([
@@ -17,19 +12,22 @@ const askForConfirmationCode = async ({phoneNumber, loginRequestCode}) => {
             type: 'input',
             name: 'confirmationCode',
             message: 'Confirmation code',
-            validate: async confirmationCode => {
-                if (isEmpty(confirmationCode)) {
+            validate: async otpCode => {
+                if (isEmpty(otpCode)) {
                     return false;
                 }
 
+                if (otpCode.length !== otpLength) {
+                    return `Code must be ${otpLength} digits long`;
+                }
+
                 try {
-                    accessParams = await confirmSmsLogin({
+                    refreshToken = await getRefreshToken({
                         phoneNumber,
-                        loginRequestCode,
-                        confirmationCode,
+                        otpCode,
                     });
                 } catch (err) {
-                    if (err === apiErrors.INVALID_CONFIRMATION_CODE) {
+                    if (err === apiErrors.INVALID_OTP_CODE) {
                         return 'Invalid confirmation code';
                     }
                     error = err;
@@ -39,14 +37,14 @@ const askForConfirmationCode = async ({phoneNumber, loginRequestCode}) => {
         },
     ]);
 
-    if (!accessParams) {
+    if (!refreshToken) {
         throw error;
     }
-    return accessParams;
+    return refreshToken;
 };
 
 const askForPhoneNumber = async oldValue => {
-    let loginRequestCode;
+    let otpLength;
     let error;
 
     const {phoneNumber} = await prompt([
@@ -60,7 +58,7 @@ const askForPhoneNumber = async oldValue => {
                 }
 
                 try {
-                    loginRequestCode = await startSmsLogin(phoneNumber);
+                    otpLength = await requestOtpCode(phoneNumber);
                 } catch (err) {
                     if (err === apiErrors.INVALID_PHONE_NUMBER) {
                         return 'Invalid phone number';
@@ -73,24 +71,21 @@ const askForPhoneNumber = async oldValue => {
         },
     ]);
 
-    if (!loginRequestCode) {
+    if (!otpLength) {
         throw error;
     }
-    return {phoneNumber, loginRequestCode};
+    return {phoneNumber, otpLength};
 };
 
 module.exports = async oldConfig => {
     blankLine();
     regular('Enter login information');
 
-    const {phoneNumber, loginRequestCode} = await askForPhoneNumber(
-        oldConfig.phoneNumber
-    );
-    const {accessId, accessToken} = await askForConfirmationCode({
+    const {phoneNumber, otpLength} = await askForPhoneNumber(oldConfig.phoneNumber);
+    const refreshToken = await askForConfirmationCode({
         phoneNumber,
-        loginRequestCode,
+        otpLength,
     });
-    const {refreshToken} = await authenticate({accessId, accessToken});
 
     return {phoneNumber, refreshToken};
 };
