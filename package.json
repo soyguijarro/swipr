@@ -24,7 +24,7 @@
         "date-fns": "^2.9.0",
         "dotenv": "^8.2.0",
         "inquirer": "^7.0.3",
-        "node-fetch": "^2.6.0"
+        "node-fetch": "^2.6.1"
     },
     "devDependencies": {
         "eslint": "^6.8.0",
